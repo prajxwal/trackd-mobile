@@ -117,3 +117,63 @@ export interface UserStats {
   currentStreak: number;
   longestStreak: number;
 }
+
+// ===== Body Section Types =====
+
+// Goal Types
+export type GoalType = 'maintenance' | 'cut' | 'bulk' | 'recomp';
+export type GoalIntensity = 'mild' | 'standard' | 'aggressive' | 'lean';
+export type Sex = 'male' | 'female';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'high';
+
+// Body Profile (stored in Supabase)
+export interface UserBodyProfile {
+  user_id: string;
+  weight_kg?: number;
+  body_fat_percent?: number;
+  height_cm?: number;
+  age?: number;
+  sex?: Sex;
+  activity_level?: ActivityLevel;
+  goal_type?: GoalType;
+  goal_intensity?: GoalIntensity;
+  custom_deficit_percent?: number; // For custom fat loss deficit
+  training_days_per_week?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Calculated Nutrition Targets
+export interface NutritionTargets {
+  bmr: number;
+  tdee: number;
+  targetCalories: number;
+  proteinGrams: number;
+  fatGrams: number;
+  carbGrams: number;
+  deficitOrSurplus: number;
+}
+
+// Activity Multipliers
+export const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  high: 1.725,
+};
+
+// Goal Labels for UI
+export const GOAL_LABELS: Record<GoalType, string> = {
+  maintenance: 'Maintain',
+  cut: 'Fat Loss',
+  bulk: 'Muscle Gain',
+  recomp: 'Recomp',
+};
+
+export const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
+  sedentary: 'Sedentary (little exercise)',
+  light: 'Light (1-3 days/week)',
+  moderate: 'Moderate (3-5 days/week)',
+  high: 'High (6-7 days/week)',
+};
+

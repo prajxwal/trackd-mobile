@@ -17,6 +17,7 @@ export function LoginScreen() {
     const { signIn, signUp } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,12 +28,17 @@ export function LoginScreen() {
             return;
         }
 
+        if (!isLogin && !name.trim()) {
+            setError('Please enter your name');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         const { error: authError } = isLogin
             ? await signIn(email, password)
-            : await signUp(email, password);
+            : await signUp(email, password, name.trim());
 
         setLoading(false);
 
@@ -58,6 +64,15 @@ export function LoginScreen() {
                 </View>
 
                 <View style={styles.form}>
+                    {!isLogin && (
+                        <Input
+                            label="Name"
+                            value={name}
+                            onChangeText={setName}
+                            placeholder="Your name"
+                            autoCapitalize="words"
+                        />
+                    )}
                     <Input
                         label="Email"
                         value={email}
@@ -92,6 +107,7 @@ export function LoginScreen() {
                         onPress={() => {
                             setIsLogin(!isLogin);
                             setError('');
+                            setName('');
                         }}
                         style={styles.switchButton}
                     >

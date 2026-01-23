@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { spacing, borderRadius, fontFamily } from '../constants/theme';
 
@@ -24,6 +25,7 @@ const Tab = createBottomTabNavigator();
 
 export function TabNavigator() {
     const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
 
     return (
         <Tab.Navigator
@@ -45,8 +47,8 @@ export function TabNavigator() {
                     borderTopWidth: 1,
                     borderTopColor: colors.border,
                     paddingTop: 6,
-                    paddingBottom: 6,
-                    height: 65,
+                    paddingBottom: Math.max(insets.bottom, 10),
+                    height: 60 + Math.max(insets.bottom, 10),
                     paddingHorizontal: 0,
                 },
                 tabBarActiveTintColor: colors.text,

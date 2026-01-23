@@ -8,6 +8,7 @@ import {
 } from '@expo-google-fonts/roboto-mono';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
+import { BodyProvider } from './src/context/BodyContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 
 function AppContent() {
@@ -20,7 +21,9 @@ function AppContent() {
         backgroundColor={colors.background}
       />
       <AuthProvider>
-        <RootNavigator />
+        <BodyProvider>
+          <RootNavigator />
+        </BodyProvider>
       </AuthProvider>
     </View>
   );

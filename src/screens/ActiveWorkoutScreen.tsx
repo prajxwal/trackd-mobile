@@ -364,10 +364,10 @@ export function ActiveWorkoutScreen({ navigation }: any) {
 
             {/* Exercise Picker Modal */}
             {showExercisePicker && (
-                <View style={[styles.modal, { backgroundColor: colors.background }]}>
-                    <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+                <SafeAreaView style={[styles.modal, { backgroundColor: colors.background }]}>
+                    <View style={[styles.modalHeader, { borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
                         <Typography variant="h3">Add Exercise</Typography>
-                        <TouchableOpacity onPress={() => setShowExercisePicker(false)}>
+                        <TouchableOpacity onPress={() => setShowExercisePicker(false)} style={styles.headerButton}>
                             <X size={24} color={colors.text} />
                         </TouchableOpacity>
                     </View>
@@ -391,7 +391,7 @@ export function ActiveWorkoutScreen({ navigation }: any) {
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
-                </View>
+                </SafeAreaView>
             )}
         </SafeAreaView>
     );

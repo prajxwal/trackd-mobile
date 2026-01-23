@@ -7,7 +7,9 @@ import {
     RefreshControl,
     TextInput,
     Alert,
+    Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { Typography, Button, Card } from '../components/common';
@@ -28,11 +30,14 @@ import {
     Trash2,
 } from 'lucide-react-native';
 
-const mealIcons: Record<string, React.ReactNode> = {
-    breakfast: <Coffee size={16} />,
-    lunch: <Sun size={16} />,
-    dinner: <Moon size={16} />,
-    snack: <Cookie size={16} />,
+const getMealIcon = (mealType: string, color: string) => {
+    switch (mealType) {
+        case 'breakfast': return <Coffee size={16} color={color} />;
+        case 'lunch': return <Sun size={16} color={color} />;
+        case 'dinner': return <Moon size={16} color={color} />;
+        case 'snack': return <Cookie size={16} color={color} />;
+        default: return <Coffee size={16} color={color} />;
+    }
 };
 
 export function NutritionScreen({ navigation }: any) {
@@ -271,9 +276,7 @@ export function NutritionScreen({ navigation }: any) {
                     <View key={mealType} style={styles.mealSection}>
                         <View style={styles.mealHeader}>
                             <View style={styles.mealTitle}>
-                                {React.cloneElement(mealIcons[mealType] as React.ReactElement, {
-                                    color: colors.text,
-                                })}
+                                {getMealIcon(mealType, colors.text)}
                                 <Typography variant="body" bold style={styles.mealName}>
                                     {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
                                 </Typography>
@@ -327,8 +330,12 @@ export function NutritionScreen({ navigation }: any) {
             </ScrollView>
 
             {/* Add Food Modal */}
-            {showAddModal && (
-                <View style={[styles.modal, { backgroundColor: colors.background }]}>
+            <Modal
+                visible={showAddModal}
+                animationType="slide"
+                presentationStyle="fullScreen"
+            >
+                <SafeAreaView style={[styles.modal, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
                         <Typography variant="h3">Add Food</Typography>
                         <TouchableOpacity onPress={() => setShowAddModal(false)}>
@@ -416,8 +423,8 @@ export function NutritionScreen({ navigation }: any) {
                             style={styles.addButton}
                         />
                     </ScrollView>
-                </View>
-            )}
+                </SafeAreaView>
+            </Modal>
 
             {/* FAB */}
             <TouchableOpacity
