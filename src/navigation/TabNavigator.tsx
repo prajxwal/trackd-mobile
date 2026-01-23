@@ -44,15 +44,20 @@ export function TabNavigator() {
                     backgroundColor: colors.background,
                     borderTopWidth: 1,
                     borderTopColor: colors.border,
-                    paddingTop: 8,
-                    paddingBottom: 8,
-                    height: 60,
+                    paddingTop: 6,
+                    paddingBottom: 6,
+                    height: 65,
+                    paddingHorizontal: 0,
                 },
                 tabBarActiveTintColor: colors.text,
                 tabBarInactiveTintColor: colors.textSecondary,
                 tabBarLabelStyle: {
                     fontFamily: fontFamily.regular,
-                    fontSize: 10,
+                    fontSize: 9,
+                    marginTop: 2,
+                },
+                tabBarItemStyle: {
+                    paddingHorizontal: 2,
                 },
             }}
         >

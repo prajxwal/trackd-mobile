@@ -6,6 +6,9 @@ import {
     TouchableOpacity,
     Alert,
     TextInput,
+    SafeAreaView,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -192,10 +195,10 @@ export function ActiveWorkoutScreen({ navigation }: any) {
     }, {} as Record<string, { exercise: Exercise; sets: ActiveSet[] }>);
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Header */}
-            <View style={[styles.header, { borderBottomColor: colors.border }]}>
-                <TouchableOpacity onPress={cancelWorkout}>
+            <View style={[styles.header, { borderBottomColor: colors.border, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+                <TouchableOpacity onPress={cancelWorkout} style={styles.headerButton}>
                     <X size={24} color={colors.text} />
                 </TouchableOpacity>
                 <View style={styles.timerContainer}>
@@ -204,7 +207,7 @@ export function ActiveWorkoutScreen({ navigation }: any) {
                         {formatDuration(duration)}
                     </Typography>
                 </View>
-                <TouchableOpacity onPress={finishWorkout}>
+                <TouchableOpacity onPress={finishWorkout} style={styles.headerButton}>
                     <Check size={24} color={colors.text} />
                 </TouchableOpacity>
             </View>
@@ -390,7 +393,7 @@ export function ActiveWorkoutScreen({ navigation }: any) {
                     </ScrollView>
                 </View>
             )}
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -404,6 +407,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: spacing.md,
         borderBottomWidth: 1,
+    },
+    headerButton: {
+        padding: spacing.xs,
+        minWidth: 40,
+        minHeight: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     timerContainer: {
         flexDirection: 'row',
