@@ -621,62 +621,64 @@ export function BodyScreen({ navigation }: any) {
                             <X size={24} color={colors.text} />
                         </TouchableOpacity>
                     </View>
-                    <ScrollView style={styles.modalContent}>
-                        <Card style={styles.infoCard}>
-                            <Typography variant="body" bold>Step 1: BMR</Typography>
-                            <Typography variant="caption" color={colors.textSecondary}>
-                                Basal Metabolic Rate (Mifflin-St Jeor)
-                            </Typography>
-                            <Typography variant="caption" color={colors.textSecondary} style={{ marginTop: spacing.xs }}>
-                                Based on: {profile.weight_kg}kg, {profile.height_cm}cm, {profile.age}y, {profile.sex}
-                            </Typography>
-                            <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
-                                {nutritionTargets.bmr} kcal
-                            </Typography>
-                        </Card>
-
-                        <Card style={styles.infoCard}>
-                            <Typography variant="body" bold>Step 2: TDEE</Typography>
-                            <Typography variant="caption" color={colors.textSecondary}>
-                                BMR × {profile.activity_level} activity multiplier
-                            </Typography>
-                            <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
-                                {nutritionTargets.tdee} kcal
-                            </Typography>
-                        </Card>
-
-                        <Card style={styles.infoCard}>
-                            <Typography variant="body" bold>Step 3: Target</Typography>
-                            <Typography variant="caption" color={colors.textSecondary}>
-                                {formatDeficitSurplus(
-                                    profile.goal_type || 'maintenance',
-                                    nutritionTargets.deficitOrSurplus,
-                                    nutritionTargets.deficitPercent
-                                )}
-                            </Typography>
-                            <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
-                                {nutritionTargets.targetCalories} kcal
-                            </Typography>
-                            <Typography variant="caption" color={colors.textSecondary}>
-                                ({nutritionTargets.deficitOrSurplus > 0 ? '+' : ''}{nutritionTargets.deficitOrSurplus} from TDEE)
-                            </Typography>
-                        </Card>
-
-                        <Card style={styles.infoCard}>
-                            <Typography variant="body" bold>Macros</Typography>
-                            <View style={{ marginTop: spacing.xs }}>
+                    {profile && nutritionTargets && (
+                        <ScrollView style={styles.modalContent}>
+                            <Card style={styles.infoCard}>
+                                <Typography variant="body" bold>Step 1: BMR</Typography>
                                 <Typography variant="caption" color={colors.textSecondary}>
-                                    Protein: {nutritionTargets.proteinGrams}g × 4 = {nutritionTargets.proteinGrams * 4} kcal
+                                    Basal Metabolic Rate (Mifflin-St Jeor)
+                                </Typography>
+                                <Typography variant="caption" color={colors.textSecondary} style={{ marginTop: spacing.xs }}>
+                                    Based on: {profile.weight_kg}kg, {profile.height_cm}cm, {profile.age}y, {profile.sex}
+                                </Typography>
+                                <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
+                                    {nutritionTargets.bmr} kcal
+                                </Typography>
+                            </Card>
+
+                            <Card style={styles.infoCard}>
+                                <Typography variant="body" bold>Step 2: TDEE</Typography>
+                                <Typography variant="caption" color={colors.textSecondary}>
+                                    BMR × {profile.activity_level} activity multiplier
+                                </Typography>
+                                <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
+                                    {nutritionTargets.tdee} kcal
+                                </Typography>
+                            </Card>
+
+                            <Card style={styles.infoCard}>
+                                <Typography variant="body" bold>Step 3: Target</Typography>
+                                <Typography variant="caption" color={colors.textSecondary}>
+                                    {formatDeficitSurplus(
+                                        profile.goal_type || 'maintenance',
+                                        nutritionTargets.deficitOrSurplus,
+                                        nutritionTargets.deficitPercent
+                                    )}
+                                </Typography>
+                                <Typography variant="h3" bold style={{ marginTop: spacing.xs }}>
+                                    {nutritionTargets.targetCalories} kcal
                                 </Typography>
                                 <Typography variant="caption" color={colors.textSecondary}>
-                                    Fat: {nutritionTargets.fatGrams}g × 9 = {nutritionTargets.fatGrams * 9} kcal
+                                    ({nutritionTargets.deficitOrSurplus > 0 ? '+' : ''}{nutritionTargets.deficitOrSurplus} from TDEE)
                                 </Typography>
-                                <Typography variant="caption" color={colors.textSecondary}>
-                                    Carbs: {nutritionTargets.carbGrams}g × 4 = {nutritionTargets.carbGrams * 4} kcal
-                                </Typography>
-                            </View>
-                        </Card>
-                    </ScrollView>
+                            </Card>
+
+                            <Card style={styles.infoCard}>
+                                <Typography variant="body" bold>Macros</Typography>
+                                <View style={{ marginTop: spacing.xs }}>
+                                    <Typography variant="caption" color={colors.textSecondary}>
+                                        Protein: {nutritionTargets.proteinGrams}g × 4 = {nutritionTargets.proteinGrams * 4} kcal
+                                    </Typography>
+                                    <Typography variant="caption" color={colors.textSecondary}>
+                                        Fat: {nutritionTargets.fatGrams}g × 9 = {nutritionTargets.fatGrams * 9} kcal
+                                    </Typography>
+                                    <Typography variant="caption" color={colors.textSecondary}>
+                                        Carbs: {nutritionTargets.carbGrams}g × 4 = {nutritionTargets.carbGrams * 4} kcal
+                                    </Typography>
+                                </View>
+                            </Card>
+                        </ScrollView>
+                    )}
                 </SafeAreaView>
             </Modal>
         </View>
