@@ -17,6 +17,10 @@ interface BodyContextType {
     loading: boolean;
     isProfileComplete: boolean;
 
+    // Effective goals (custom override > calculated > default)
+    effectiveCalorieGoal: number;
+    effectiveProteinGoal: number;
+
     // Actions
     fetchProfile: () => Promise<void>;
     updateProfile: (updates: Partial<UserBodyProfile>) => Promise<boolean>;
@@ -113,6 +117,10 @@ export function BodyProvider({ children }: { children: ReactNode }) {
         }
     }, [user]);
 
+    // Calculate effective goals: custom override > calculated > default
+    const effectiveCalorieGoal = profile?.custom_calorie_goal || nutritionTargets?.targetCalories || 2000;
+    const effectiveProteinGoal = nutritionTargets?.proteinGrams || 150;
+
     return (
         <BodyContext.Provider
             value={{
@@ -120,6 +128,8 @@ export function BodyProvider({ children }: { children: ReactNode }) {
                 nutritionTargets,
                 loading,
                 isProfileComplete,
+                effectiveCalorieGoal,
+                effectiveProteinGoal,
                 fetchProfile,
                 updateProfile,
                 refreshData,

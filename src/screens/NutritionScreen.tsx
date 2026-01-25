@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useBody } from '../context/BodyContext';
 import { Typography, Button, Card } from '../components/common';
 import { spacing, fontFamily, fontSize, borderRadius } from '../constants/theme';
 import { supabase } from '../lib/supabase';
@@ -118,8 +119,10 @@ export function NutritionScreen({ navigation }: any) {
         { calories: 0, protein: 0, carbs: 0, fat: 0 }
     );
 
-    const calorieGoal = settings?.calorie_goal || 2000;
-    const proteinGoal = settings?.protein_goal || 150;
+    // Use effective goals from BodyContext (custom override > calculated > default)
+    const { effectiveCalorieGoal, effectiveProteinGoal } = useBody();
+    const calorieGoal = effectiveCalorieGoal;
+    const proteinGoal = effectiveProteinGoal;
 
     const addFoodEntry = async () => {
         if (!foodName.trim()) {

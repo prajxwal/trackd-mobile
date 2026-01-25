@@ -4,8 +4,8 @@ export interface UserSettings {
   units: 'metric' | 'imperial';
   theme: 'dark' | 'light';
   rest_days: number[]; // 0-6, Sunday = 0
-  calorie_goal: number;
-  protein_goal: number;
+  calorie_goal?: number; // Optional - if not set, uses Body Profile calculated value
+  protein_goal?: number; // Optional - if not set, uses Body Profile calculated value
 }
 
 // Exercise
@@ -138,6 +138,7 @@ export interface UserBodyProfile {
   goal_type?: GoalType;
   goal_intensity?: GoalIntensity;
   custom_deficit_percent?: number; // For custom fat loss deficit
+  custom_calorie_goal?: number; // Optional override for calculated calorie target
   training_days_per_week?: number;
   created_at?: string;
   updated_at?: string;

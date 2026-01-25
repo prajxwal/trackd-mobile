@@ -42,7 +42,6 @@ export function BodyScreen({ navigation }: any) {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showCalorieInfo, setShowCalorieInfo] = useState(false);
 
-    // Profile form state
     const [profileForm, setProfileForm] = useState({
         weight_kg: '',
         body_fat_percent: '',
@@ -53,6 +52,7 @@ export function BodyScreen({ navigation }: any) {
         goal_type: 'maintenance' as GoalType,
         goal_intensity: 'standard' as GoalIntensity,
         custom_deficit_percent: '',
+        custom_calorie_goal: '',
     });
 
     const [useCustomDeficit, setUseCustomDeficit] = useState(false);
@@ -100,6 +100,7 @@ export function BodyScreen({ navigation }: any) {
                 goal_type: profile.goal_type || 'maintenance',
                 goal_intensity: profile.goal_intensity || 'standard',
                 custom_deficit_percent: deficitValue,
+                custom_calorie_goal: profile.custom_calorie_goal?.toString() || '',
             });
             // Only set useCustomDeficit if there's a value AND it's not a preset
             setUseCustomDeficit(!!deficitValue && !isPreset);
@@ -151,6 +152,13 @@ export function BodyScreen({ navigation }: any) {
             updates.custom_deficit_percent = parseInt(profileForm.custom_deficit_percent);
         } else {
             updates.custom_deficit_percent = null;
+        }
+
+        // Custom calorie goal override
+        if (profileForm.custom_calorie_goal) {
+            updates.custom_calorie_goal = parseInt(profileForm.custom_calorie_goal);
+        } else {
+            updates.custom_calorie_goal = null; // Clear override, use calculated
         }
 
         const success = await updateProfile(updates);
@@ -597,6 +605,24 @@ export function BodyScreen({ navigation }: any) {
                                 </View>
                             </>
                         )}
+
+                        {/* Custom Calorie Override Section */}
+                        <View style={{ marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border }}>
+                            <Typography variant="bodySmall" color={colors.textSecondary}>
+                                Custom Calorie Goal (optional)
+                            </Typography>
+                            <Typography variant="caption" color={colors.textSecondary} style={{ marginBottom: spacing.xs }}>
+                                Leave empty to use calculated value. Set a custom goal if you want a different target.
+                            </Typography>
+                            <TextInput
+                                style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+                                placeholder={nutritionTargets ? `Calculated: ${nutritionTargets.targetCalories} kcal` : 'e.g. 2000'}
+                                placeholderTextColor={colors.textSecondary}
+                                value={profileForm.custom_calorie_goal || ''}
+                                onChangeText={(v) => setProfileForm({ ...profileForm, custom_calorie_goal: v })}
+                                keyboardType="numeric"
+                            />
+                        </View>
 
                         <Button
                             title="Save Profile"

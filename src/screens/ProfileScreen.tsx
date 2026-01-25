@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useBody } from '../context/BodyContext';
 import { Typography, Card, Button } from '../components/common';
 import { spacing } from '../constants/theme';
 import { supabase } from '../lib/supabase';
@@ -23,6 +24,7 @@ import {
     LogOut,
     ChevronRight,
     Target,
+    Edit3,
 } from 'lucide-react-native';
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -30,6 +32,7 @@ const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export function ProfileScreen({ navigation }: any) {
     const { colors, isDark, toggleTheme } = useTheme();
     const { user, signOut } = useAuth();
+    const { nutritionTargets, isProfileComplete, profile } = useBody();
     const [settings, setSettings] = useState<UserSettings | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -51,8 +54,7 @@ export function ProfileScreen({ navigation }: any) {
                     units: 'metric',
                     theme: 'dark',
                     rest_days: [0, 6],
-                    calorie_goal: 2000,
-                    protein_goal: 150,
+                    // Don't set calorie_goal/protein_goal by default - use Body Profile calculated values
                 };
 
                 const { data: newData, error: insertError } = await supabase
@@ -121,8 +123,7 @@ export function ProfileScreen({ navigation }: any) {
                 units: 'metric',
                 theme: 'dark',
                 rest_days: newRestDays,
-                calorie_goal: 2000,
-                protein_goal: 150,
+                // Don't set calorie/protein goals - use Body Profile calculated values
             };
             setSettings(newSettings);
         }
@@ -136,8 +137,9 @@ export function ProfileScreen({ navigation }: any) {
                     rest_days: newRestDays,
                     units: settings?.units || 'metric',
                     theme: settings?.theme || 'dark',
-                    calorie_goal: settings?.calorie_goal || 2000,
-                    protein_goal: settings?.protein_goal || 150,
+                    // Preserve existing calorie/protein goals if set
+                    ...(settings?.calorie_goal ? { calorie_goal: settings.calorie_goal } : {}),
+                    ...(settings?.protein_goal ? { protein_goal: settings.protein_goal } : {}),
                 });
 
             if (error) {
@@ -270,28 +272,64 @@ export function ProfileScreen({ navigation }: any) {
 
                 {/* Goals */}
                 <Card style={styles.section}>
-                    <View style={styles.settingHeader}>
-                        <Target size={20} color={colors.text} />
-                        <Typography variant="body" style={styles.settingLabel}>
-                            Daily Goals
-                        </Typography>
+                    <View style={[styles.settingRow, { marginBottom: spacing.sm }]}>
+                        <View style={styles.settingLeft}>
+                            <Target size={20} color={colors.text} />
+                            <Typography variant="body" style={styles.settingLabel}>
+                                Daily Goals
+                            </Typography>
+                        </View>
+                        <TouchableOpacity onPress={() => navigation.navigate('Body')}>
+                            <Typography variant="caption" color={colors.textSecondary}>
+                                Edit →
+                            </Typography>
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.goalRow}>
                         <Typography variant="bodySmall" color={colors.textSecondary}>
                             Calorie Goal
                         </Typography>
-                        <Typography variant="body" bold>
-                            {settings?.calorie_goal || 2000} kcal
-                        </Typography>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Typography variant="body" bold>
+                                {profile?.custom_calorie_goal || nutritionTargets?.targetCalories || 2000} kcal
+                            </Typography>
+                            {!profile?.custom_calorie_goal && nutritionTargets?.targetCalories && (
+                                <Typography variant="caption" color={colors.textSecondary} style={{ marginLeft: spacing.xs }}>
+                                    (calc)
+                                </Typography>
+                            )}
+                            {profile?.custom_calorie_goal && (
+                                <Typography variant="caption" color={colors.textSecondary} style={{ marginLeft: spacing.xs }}>
+                                    (custom)
+                                </Typography>
+                            )}
+                        </View>
                     </View>
                     <View style={styles.goalRow}>
                         <Typography variant="bodySmall" color={colors.textSecondary}>
                             Protein Goal
                         </Typography>
-                        <Typography variant="body" bold>
-                            {settings?.protein_goal || 150}g
-                        </Typography>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Typography variant="body" bold>
+                                {nutritionTargets?.proteinGrams || 150}g
+                            </Typography>
+                            {nutritionTargets?.proteinGrams && (
+                                <Typography variant="caption" color={colors.textSecondary} style={{ marginLeft: spacing.xs }}>
+                                    (calc)
+                                </Typography>
+                            )}
+                        </View>
                     </View>
+                    {!isProfileComplete && (
+                        <TouchableOpacity
+                            style={{ marginTop: spacing.sm }}
+                            onPress={() => navigation.navigate('Body')}
+                        >
+                            <Typography variant="caption" color={colors.textSecondary}>
+                                Set up Body Profile for personalized goals →
+                            </Typography>
+                        </TouchableOpacity>
+                    )}
                 </Card>
 
                 {/* Exercise Library */}
