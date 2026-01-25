@@ -37,26 +37,42 @@ export function ProfileScreen({ navigation }: any) {
         if (!user) return;
 
         try {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('user_settings')
                 .select('*')
                 .eq('user_id', user.id)
                 .single();
 
-            if (data) {
+            if (error && error.code === 'PGRST116') {
+                // No row found - create default settings
+                console.log('Creating default settings...');
+                const defaultSettings = {
+                    user_id: user.id,
+                    units: 'metric',
+                    theme: 'dark',
+                    rest_days: [0, 6],
+                    calorie_goal: 2000,
+                    protein_goal: 150,
+                };
+
+                const { data: newData, error: insertError } = await supabase
+                    .from('user_settings')
+                    .insert(defaultSettings)
+                    .select()
+                    .single();
+
+                if (insertError) {
+                    console.error('Error creating settings:', insertError);
+                } else if (newData) {
+                    setSettings(newData);
+                }
+            } else if (error) {
+                console.error('Error fetching settings:', error);
+            } else if (data) {
                 setSettings(data);
             }
         } catch (error) {
-            // Create default settings if not exists
-            await supabase.from('user_settings').insert({
-                user_id: user.id,
-                units: 'metric',
-                theme: 'dark',
-                rest_days: [0, 6],
-                calorie_goal: 2000,
-                protein_goal: 150,
-            });
-            fetchSettings();
+            console.error('Error in fetchSettings:', error);
         } finally {
             setLoading(false);
         }
@@ -70,10 +86,15 @@ export function ProfileScreen({ navigation }: any) {
         if (!user) return;
 
         try {
-            await supabase
+            const { error } = await supabase
                 .from('user_settings')
                 .update({ [key]: value })
                 .eq('user_id', user.id);
+
+            if (error) {
+                console.error('Error updating setting:', error);
+                return;
+            }
 
             setSettings((prev) => (prev ? { ...prev, [key]: value } : null));
         } catch (error) {
@@ -81,13 +102,50 @@ export function ProfileScreen({ navigation }: any) {
         }
     };
 
-    const toggleRestDay = (day: number) => {
-        if (!settings) return;
-        const currentRestDays = settings.rest_days || [];
+    const toggleRestDay = async (day: number) => {
+        if (!user) return;
+
+        // Use default rest days if settings or rest_days is null
+        const currentRestDays = settings?.rest_days || [0, 6];
         const newRestDays = currentRestDays.includes(day)
             ? currentRestDays.filter((d) => d !== day)
-            : [...currentRestDays, day];
-        updateSetting('rest_days', newRestDays);
+            : [...currentRestDays, day].sort((a, b) => a - b);
+
+        // Update local state immediately for responsiveness
+        if (settings) {
+            setSettings({ ...settings, rest_days: newRestDays });
+        } else {
+            // Create settings object if it doesn't exist
+            const newSettings: UserSettings = {
+                user_id: user.id,
+                units: 'metric',
+                theme: 'dark',
+                rest_days: newRestDays,
+                calorie_goal: 2000,
+                protein_goal: 150,
+            };
+            setSettings(newSettings);
+        }
+
+        // Save to database with upsert
+        try {
+            const { error } = await supabase
+                .from('user_settings')
+                .upsert({
+                    user_id: user.id,
+                    rest_days: newRestDays,
+                    units: settings?.units || 'metric',
+                    theme: settings?.theme || 'dark',
+                    calorie_goal: settings?.calorie_goal || 2000,
+                    protein_goal: settings?.protein_goal || 150,
+                });
+
+            if (error) {
+                console.error('Error saving rest days:', error);
+            }
+        } catch (error) {
+            console.error('Error saving rest days:', error);
+        }
     };
 
     const handleSignOut = () => {
@@ -179,33 +237,35 @@ export function ProfileScreen({ navigation }: any) {
                         Rest days won't break your streak
                     </Typography>
                     <View style={styles.daysRow}>
-                        {daysOfWeek.map((day, index) => (
-                            <TouchableOpacity
-                                key={day}
-                                style={[
-                                    styles.dayButton,
-                                    {
-                                        backgroundColor: settings?.rest_days?.includes(index)
-                                            ? colors.text
-                                            : 'transparent',
-                                        borderColor: colors.border,
-                                    },
-                                ]}
-                                onPress={() => toggleRestDay(index)}
-                            >
-                                <Typography
-                                    variant="caption"
-                                    color={
-                                        settings?.rest_days?.includes(index)
-                                            ? colors.background
-                                            : colors.text
-                                    }
+                        {daysOfWeek.map((day, index) => {
+                            const isSelected = settings?.rest_days?.includes(index) ?? (index === 0 || index === 6);
+                            return (
+                                <TouchableOpacity
+                                    key={day}
+                                    style={[
+                                        styles.dayButton,
+                                        {
+                                            backgroundColor: isSelected ? colors.text : 'transparent',
+                                            borderColor: isSelected ? colors.text : colors.border,
+                                            borderWidth: isSelected ? 2 : 1,
+                                        },
+                                    ]}
+                                    onPress={() => toggleRestDay(index)}
                                 >
-                                    {day}
-                                </Typography>
-                            </TouchableOpacity>
-                        ))}
+                                    <Typography
+                                        variant="caption"
+                                        bold={isSelected}
+                                        color={isSelected ? colors.background : colors.text}
+                                    >
+                                        {day}
+                                    </Typography>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
+                    <Typography variant="caption" color={colors.textSecondary} style={{ marginTop: spacing.sm }}>
+                        Selected: {(settings?.rest_days ?? [0, 6]).map(d => daysOfWeek[d]).join(', ') || 'None'}
+                    </Typography>
                 </Card>
 
                 {/* Goals */}

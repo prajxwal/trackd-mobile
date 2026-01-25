@@ -24,51 +24,49 @@ export function calculateStreak(
     );
 
     let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
     let date = startOfDay(new Date());
 
-    // Check if today or yesterday has a workout (to start counting)
-    const todayStr = date.toISOString();
-    const yesterdayStr = startOfDay(subDays(date, 1)).toISOString();
+    // Count current streak going backwards from today
+    // The logic: for each day going backwards:
+    // - If it's a rest day, skip it (don't break streak, don't add to streak)
+    // - If it's a workout day, add to streak
+    // - If it's a non-rest day WITHOUT a workout, the streak is broken
 
-    const todayIsRestDay = restDays.includes(date.getDay());
-    const hasTodayWorkout = workoutDates.has(todayStr);
-    const hasYesterdayWorkout = workoutDates.has(yesterdayStr);
+    let daysChecked = 0;
+    const MAX_DAYS_TO_CHECK = 365;
 
-    // If today is not a rest day and no workout, check if yesterday had one
-    if (!todayIsRestDay && !hasTodayWorkout) {
-        // Allow checking from yesterday if today hasn't been worked out yet
-        if (!hasYesterdayWorkout && !restDays.includes(subDays(date, 1).getDay())) {
-            return { currentStreak: 0, longestStreak: calculateLongestStreak(workoutDates, restDays) };
-        }
-        date = subDays(date, 1);
-    }
-
-    // Count current streak going backwards
-    while (true) {
+    while (daysChecked < MAX_DAYS_TO_CHECK) {
         const dateStr = startOfDay(date).toISOString();
         const dayOfWeek = date.getDay();
         const isRestDay = restDays.includes(dayOfWeek);
+        const hasWorkout = workoutDates.has(dateStr);
 
         if (isRestDay) {
-            // Skip rest days, they don't break the streak
+            // Rest days don't count for or against the streak
             date = subDays(date, 1);
+            daysChecked++;
             continue;
         }
 
-        if (workoutDates.has(dateStr)) {
+        if (hasWorkout) {
+            // Workout on a non-rest day - increment streak
             currentStreak++;
             date = subDays(date, 1);
+            daysChecked++;
         } else {
+            // Non-rest day without workout - streak is broken
+            // BUT: if we haven't found ANY workouts yet (currentStreak is 0),
+            // we need to check if there's a recent workout we should count
+            if (currentStreak === 0) {
+                // No workouts counted yet - streak is simply 0
+                break;
+            }
+            // We were counting and hit a gap - streak ends
             break;
         }
-
-        // Safety limit
-        if (currentStreak > 365) break;
     }
 
-    longestStreak = calculateLongestStreak(workoutDates, restDays);
+    const longestStreak = calculateLongestStreak(workoutDates, restDays);
 
     return {
         currentStreak,
